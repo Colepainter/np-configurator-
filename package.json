@@ -4,6 +4,6 @@
   "description": "New Primitive product configurator with Airtable backend",
   "private": true,
   "engines": {
-    "node": "18.x"
+    "node": "24.x"
   }
 }
