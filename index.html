@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Configure Your Build — New Primitive°</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #1a1a1a;
+    --white: #ffffff;
+    --gray-50: #f9f8f6;
+    --gray-100: #f0ede8;
+    --gray-200: #e0dbd3;
+    --gray-400: #a09890;
+    --gray-600: #6b6460;
+    --gray-800: #3a3430;
+    --green: #2d6a4f;
+    --green-light: #e8f4ed;
+    --blue: #1a5276;
+    --blue-light: #eaf0f8;
+    --accent: #c4a882;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.10);
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--gray-50);
+    color: var(--black);
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo { font-size: 15px; font-weight: 600; letter-spacing: 0.04em; color: var(--black); }
+  .logo span { color: var(--accent); }
+  .total-chip {
+    background: var(--black);
+    color: var(--white);
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s;
+  }
+  .total-chip.has-price { background: var(--green); }
+
+  /* Progress */
+  .progress-bar {
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 0.75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .steps { display: flex; gap: 4px; flex: 1; }
+  .step-dot {
+    height: 3px; flex: 1; border-radius: 2px;
+    background: var(--gray-200); transition: background 0.25s;
+  }
+  .step-dot.done { background: var(--green); }
+  .step-dot.active { background: var(--blue); }
+  .step-label { font-size: 12px; color: var(--gray-600); white-space: nowrap; }
+
+  /* Main layout */
+  .main { max-width: 860px; margin: 0 auto; padding: 2rem 1.25rem 5rem; }
+
+  /* Steps */
+  .step { display: none; }
+  .step.active { display: block; }
+
+  /* Section headers */
+  .step-title { font-size: 20px; font-weight: 600; color: var(--black); margin-bottom: 0.375rem; }
+  .step-sub { font-size: 14px; color: var(--gray-600); margin-bottom: 1.75rem; line-height: 1.5; }
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--gray-600);
+    margin: 1.5rem 0 0.625rem;
+  }
+  .section-label:first-of-type { margin-top: 0; }
+
+  /* Model cards */
+  .model-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  @media (max-width: 520px) { .model-grid { grid-template-columns: 1fr; } }
+
+  .model-card {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 18px 16px;
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .model-card:hover { border-color: var(--gray-400); box-shadow: var(--shadow-sm); }
+  .model-card.selected { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(26,82,118,0.1); }
+
+  .model-badge {
+    display: inline-flex; align-items: center;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 999px; margin-bottom: 10px;
+  }
+  .badge-standard { background: var(--gray-100); color: var(--gray-600); }
+  .badge-premium { background: #f0e8d8; color: #7a5c2e; }
+  .badge-suite { background: #1a5276; color: #ffffff; }
+
+  .model-name { font-size: 17px; font-weight: 600; color: var(--black); margin-bottom: 3px; }
+  .model-dim { font-size: 11px; color: var(--gray-400); margin-bottom: 10px; }
+  .model-price { font-size: 22px; font-weight: 700; color: var(--blue); margin-bottom: 4px; }
+  .model-cap { font-size: 12px; color: var(--gray-600); margin-bottom: 10px; }
+  .model-includes {
+    font-size: 11px; color: var(--green);
+    padding: 6px 10px; background: var(--green-light);
+    border-radius: var(--radius-sm); line-height: 1.5;
+  }
+
+  .selected-check {
+    position: absolute; top: 12px; right: 12px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--blue); display: none; align-items: center; justify-content: center;
+  }
+  .model-card.selected .selected-check { display: flex; }
+
+  /* Option chips */
+  .opt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .opt-chip {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 11px 13px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .opt-chip:hover { border-color: var(--gray-400); }
+  .opt-chip.selected { border-color: var(--blue); background: var(--blue-light); }
+  .opt-chip-name { font-size: 13px; font-weight: 500; color: var(--black); }
+  .opt-chip-price { font-size: 11px; color: var(--gray-600); margin-top: 2px; }
+  .opt-chip.selected .opt-chip-price { color: var(--blue); }
+
+  /* Toggle rows (optional structural add-ons) */
+  .toggle-row {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 13px 15px;
+    cursor: pointer;
+    margin-bottom: 8px;
+    transition: border-color 0.15s;
+  }
+  .toggle-row:hover { border-color: var(--gray-400); }
+  .toggle-row.selected { border-color: var(--blue); background: var(--blue-light); }
+  .toggle-info { flex: 1; }
+  .toggle-name { font-size: 13px; font-weight: 500; color: var(--black); }
+  .toggle-desc { font-size: 11px; color: var(--gray-600); margin-top: 1px; }
+  .toggle-price { font-size: 13px; color: var(--gray-600); margin-right: 4px; }
+  .toggle-row.selected .toggle-price { color: var(--blue); }
+  .switch {
+    width: 38px; height: 22px; border-radius: 11px;
+    background: var(--gray-200); position: relative;
+    transition: background 0.2s; flex-shrink: 0;
+  }
+  .switch.on { background: var(--blue); }
+  .knob {
+    position: absolute; top: 3px; left: 3px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: white; transition: left 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .switch.on .knob { left: 19px; }
+
+  /* Addon checkboxes */
+  .addon-row {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    padding: 11px 13px;
+    cursor: pointer;
+    margin-bottom: 8px;
+    transition: border-color 0.15s;
+  }
+  .addon-row:hover { border-color: var(--gray-400); }
+  .addon-row.selected { border-color: var(--blue); background: var(--blue-light); }
+  .checkbox {
+    width: 20px; height: 20px; border-radius: 5px;
+    border: 1.5px solid var(--gray-200);
+    background: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.15s;
+  }
+  .addon-row.selected .checkbox { background: var(--blue); border-color: var(--blue); }
+  .addon-label { flex: 1; font-size: 13px; color: var(--black); }
+  .addon-price { font-size: 12px; color: var(--gray-600); }
+  .addon-row.selected .addon-price { color: var(--blue); }
+
+  /* Included note */
+  .included-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; color: var(--green); font-weight: 500;
+    background: var(--green-light); padding: 5px 11px;
+    border-radius: 999px; margin-bottom: 1rem;
+  }
+
+  /* Form */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 520px) { .form-grid { grid-template-columns: 1fr; } }
+  .form-group { margin-bottom: 1rem; }
+  .form-label { display: block; font-size: 12px; color: var(--gray-600); margin-bottom: 5px; font-weight: 500; }
+  .form-input {
+    width: 100%; padding: 10px 12px;
+    border: 1.5px solid var(--gray-200); border-radius: var(--radius-md);
+    background: var(--white); color: var(--black);
+    font-size: 14px; font-family: inherit;
+    transition: border-color 0.15s;
+  }
+  .form-input:focus { outline: none; border-color: var(--blue); }
+  .form-input::placeholder { color: var(--gray-400); }
+
+  /* Review */
+  .review-card {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  .review-section { padding: 1.125rem 1.25rem; border-bottom: 1px solid var(--gray-100); }
+  .review-section:last-child { border-bottom: none; }
+  .review-section-title { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray-600); margin-bottom: 0.75rem; }
+  .review-row { display: flex; justify-content: space-between; align-items: baseline; padding: 3px 0; }
+  .review-key { font-size: 13px; color: var(--gray-600); }
+  .review-val { font-size: 13px; color: var(--black); text-align: right; max-width: 55%; }
+  .review-row.headline .review-key { font-size: 15px; font-weight: 600; color: var(--black); }
+  .review-row.headline .review-val { font-size: 15px; font-weight: 600; color: var(--blue); }
+  .review-total {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.125rem 1.25rem;
+    background: var(--gray-50);
+  }
+  .review-total-label { font-size: 14px; font-weight: 600; color: var(--black); }
+  .review-total-price { font-size: 24px; font-weight: 700; color: var(--blue); }
+  .review-disclaimer { font-size: 11px; color: var(--gray-400); margin-top: 0.75rem; line-height: 1.6; }
+
+  /* Buttons */
+  .btn-row { display: flex; gap: 10px; margin-top: 1.75rem; }
+  .btn {
+    padding: 11px 22px; border-radius: var(--radius-md);
+    font-size: 14px; font-weight: 500; cursor: pointer;
+    border: 1.5px solid var(--gray-200);
+    background: var(--white); color: var(--black);
+    font-family: inherit; transition: all 0.15s;
+  }
+  .btn:hover { background: var(--gray-100); }
+  .btn-primary {
+    background: var(--black); color: var(--white);
+    border-color: var(--black); flex: 1;
+  }
+  .btn-primary:hover { background: var(--gray-800); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* Success */
+  .success-page { text-align: center; padding: 3rem 1rem; }
+  .success-icon {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: var(--green-light);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem;
+  }
+  .success-title { font-size: 22px; font-weight: 700; color: var(--black); margin-bottom: 0.5rem; }
+  .success-body { font-size: 15px; color: var(--gray-600); line-height: 1.6; max-width: 400px; margin: 0 auto 2rem; }
+  .success-card {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: 1.25rem 1.5rem;
+    text-align: left; max-width: 400px;
+    margin: 0 auto; font-size: 13px;
+  }
+  .success-card strong { display: block; font-size: 15px; margin-bottom: 4px; }
+  .success-card span { color: var(--gray-600); line-height: 2; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">NEW PRIMITIVE<span>°</span></div>
+  <div class="total-chip" id="total-chip">Configure your build</div>
+</header>
+
+<div class="progress-bar">
+  <div class="steps" id="steps">
+    <div class="step-dot active"></div>
+    <div class="step-dot"></div>
+    <div class="step-dot"></div>
+    <div class="step-dot"></div>
+    <div class="step-dot"></div>
+  </div>
+  <div class="step-label" id="step-label">Step 1 of 5</div>
+</div>
+
+<main class="main">
+
+  <!-- STEP 1: MODEL -->
+  <div class="step active" id="step-1">
+    <h1 class="step-title">Choose your model</h1>
+    <p class="step-sub">Four builds. Each one a complete wellness system.</p>
+    <div class="model-grid" id="model-grid"></div>
+  </div>
+
+  <!-- STEP 2: SPECS -->
+  <div class="step" id="step-2">
+    <h1 class="step-title">Customize your build</h1>
+    <p class="step-sub">Every selection is built to order — no stock units.</p>
+
+    <div class="section-label">Exterior cladding</div>
+    <div class="opt-grid" id="ext-grid"></div>
+
+    <div class="section-label">Interior wood</div>
+    <div class="opt-grid" id="int-grid"></div>
+
+    <div class="section-label">Heater</div>
+    <div class="opt-grid" id="heat-grid"></div>
+
+    <div class="section-label">Bench layout</div>
+    <div class="opt-grid" id="bench-grid"></div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="goStep(1)">Back</button>
+      <button class="btn btn-primary" onclick="goStep(3)">Continue</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: ADD-ONS -->
+  <div class="step" id="step-3">
+    <h1 class="step-title">Add-ons</h1>
+    <p class="step-sub">Enhance your build with accessories and upgrades.</p>
+    <div id="addons-container"></div>
+    <div class="btn-row">
+      <button class="btn" onclick="goStep(2)">Back</button>
+      <button class="btn btn-primary" onclick="goStep(4)">Continue</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: CONTACT -->
+  <div class="step" id="step-4">
+    <h1 class="step-title">Your details</h1>
+    <p class="step-sub">We'll reach out within 24 hours to confirm your estimate and walk through next steps.</p>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">First name *</label>
+        <input class="form-input" id="f-first" placeholder="First name" autocomplete="given-name" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Last name</label>
+        <input class="form-input" id="f-last" placeholder="Last name" autocomplete="family-name" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email *</label>
+      <input class="form-input" id="f-email" type="email" placeholder="your@email.com" autocomplete="email" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Phone</label>
+      <input class="form-input" id="f-phone" type="tel" placeholder="(801) 555-0100" autocomplete="tel" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Install address</label>
+      <input class="form-input" id="f-address" placeholder="Street, city, state" autocomplete="street-address" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes or special requests</label>
+      <textarea class="form-input" id="f-notes" rows="3" placeholder="Site details, questions, custom dimensions..."></textarea>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="goStep(3)">Back</button>
+      <button class="btn btn-primary" onclick="toReview()">Review order →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: REVIEW -->
+  <div class="step" id="step-5">
+    <h1 class="step-title">Review your order</h1>
+    <p class="step-sub">Check everything looks right before submitting.</p>
+    <div id="review-content"></div>
+    <div class="btn-row">
+      <button class="btn" onclick="goStep(4)">Edit</button>
+      <button class="btn btn-primary" id="submit-btn" onclick="submitOrder()">Submit inquiry →</button>
+    </div>
+  </div>
+
+  <!-- STEP 6: SUCCESS -->
+  <div class="step" id="step-6">
+    <div class="success-page">
+      <div class="success-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+          <path d="M5 12l5 5L20 7" stroke="#2d6a4f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h2 class="success-title">Inquiry submitted</h2>
+      <p class="success-body">Your configuration has been received. Cole will be in touch within 24 hours to confirm your estimate and next steps.</p>
+      <div class="success-card" id="success-card"></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const MODELS = [
+  {
+    id: 'nook-plus', name: 'Nook Plus', sku: 'NP-NOOK-PLUS',
+    dim: "9'3\" × 8'3\" × 9'4\"", cap: '2–3 person', price: 35800,
+    includes: 'Sauna + 36" covered porch',
+    badge: 'Compact', badgeClass: 'badge-standard',
+    addons: ['cold-plunge', 'window', 'red-light', 'sonos', 'starlight-75', 'starlight-100']
+  },
+  {
+    id: '212-plus', name: '212 Plus', sku: 'NP-212-PLUS',
+    dim: "12'3\" × 8'3\" × 9'4\"", cap: '4–6 person', price: 41800,
+    includes: 'Sauna + 36" covered porch',
+    badge: 'Mid-size', badgeClass: 'badge-standard',
+    addons: ['cold-plunge', 'window', 'red-light', 'sonos', 'starlight-75', 'starlight-100']
+  },
+  {
+    id: 'primitive-retreat', name: 'Primitive Retreat', sku: 'NP-PR',
+    dim: "13'6\" × 8'3\" × 9'8\"", cap: '4–6 person', price: 51700,
+    includes: 'Sauna + cold plunge included',
+    badge: 'Full Wellness', badgeClass: 'badge-premium',
+    addons: ['deck', 'porch-shower', 'window', 'red-light', 'sonos', 'starlight-75', 'starlight-100']
+  },
+  {
+    id: 'thermal-suite', name: 'Thermal Suite', sku: 'NP-TS',
+    dim: "16'6\" × 8'3\" × 9'8\"", cap: '4–6 person', price: 57900,
+    includes: 'Sauna + cold plunge + porch — fully enclosed',
+    badge: 'Wellness in a Box', badgeClass: 'badge-suite',
+    addons: ['window', 'red-light', 'sonos', 'starlight-75', 'starlight-100']
+  }
+];
+
+const EXTERIORS = [
+  { id: 'bb-pine',      name: 'Board & Batten Pine',  desc: 'Standard',                  price: 0 },
+  { id: 'charred-pine', name: 'Charred Pine',          desc: 'Burned black oil finish',   price: 140 },
+  { id: 'ash-tg',       name: 'Thermory Ash T&G',      desc: 'Thermally modified ash',    price: 450 },
+  { id: 'black-metal',  name: 'Black Metal Panel',     desc: 'Contemporary steel',        price: 750 },
+];
+
+const INTERIORS = [
+  { id: 'knotty-cedar',  name: 'Knotty Cedar T&G',          desc: 'Standard',       price: 0 },
+  { id: 'clear-hemlock', name: 'Clear Hemlock',              desc: 'Premium grade',  price: 700 },
+  { id: 'clear-wrc',     name: 'Clear Western Red Cedar',    desc: 'Premium+',       price: 980 },
+];
+
+const HEATERS = [
+  { id: 'iki-wall',    name: 'IKI 9kW Wall',          desc: 'Standard',            price: 0 },
+  { id: 'iki-pillar',  name: 'IKI 9kW Pillar',        desc: 'Popular upgrade',     price: 450 },
+  { id: 'himalaya',    name: 'Finnleo Himalaya 9kW',  desc: 'Floor-standing',      price: 2700 },
+];
+
+const BENCHES = [
+  { id: 'stadium',     name: 'Stadium Seating',  desc: 'Multi-level tiered',    price: 0 },
+  { id: 'l-shape',     name: 'L-Shape',          desc: 'Corner layout',         price: 0 },
+  { id: 'u-shape',     name: 'U-Shape',          desc: 'Three wall benches',    price: 0 },
+  { id: 'single-wall', name: 'Single Wall',      desc: 'Minimal layout',        price: 0 },
+];
+
+const ADDON_DEFS = {
+  'cold-plunge':   { name: 'Cold Life Tub + Chiller',           price: 7900,  cat: 'Cold therapy',  toggle: false },
+  'deck':          { name: 'Thermally Modified Pine Deck',      price: 6500,  cat: 'Outdoor',       toggle: true,  desc: "8'L × 8'3\"D hidden fastener pine" },
+  'porch-shower':  { name: 'Outdoor Porch Shower',              price: 2200,  cat: 'Outdoor',       toggle: true,  desc: 'Requires deck' },
+  'window':        { name: 'Peek-Out Window 24×60',             price: 1500,  cat: 'Windows',       toggle: false },
+  'red-light':     { name: 'Red Light (MitoMEGA 2.0)',          price: 1049,  cat: 'Wellness',      toggle: false },
+  'sonos':         { name: 'Sonos Hardwired Speakers',          price: 1288,  cat: 'Audio',         toggle: false },
+  'starlight-75':  { name: 'Cariitti Starlight 75 Fiber',       price: 1027,  cat: 'Lighting',      toggle: false },
+  'starlight-100': { name: 'Cariitti Starlight 100 Fiber',      price: 1191,  cat: 'Lighting',      toggle: false },
+};
+
+const S = {
+  model: null,
+  exterior: 'bb-pine',
+  interior: 'knotty-cedar',
+  heater: 'iki-wall',
+  bench: 'stadium',
+  addons: new Set()
+};
+let step = 1;
+
+function fmt(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+
+function total() {
+  if (!S.model) return 0;
+  const m = MODELS.find(x => x.id === S.model);
+  let t = m.price;
+  [EXTERIORS, INTERIORS, HEATERS].forEach(list => {
+    const key = list === EXTERIORS ? 'exterior' : list === INTERIORS ? 'interior' : 'heater';
+    const found = list.find(x => x.id === S[key]);
+    if (found) t += found.price;
+  });
+  S.addons.forEach(id => { t += (ADDON_DEFS[id] || {price: 0}).price; });
+  return t;
+}
+
+function updateTotalChip() {
+  const chip = document.getElementById('total-chip');
+  const t = total();
+  if (t > 0) {
+    chip.textContent = fmt(t);
+    chip.classList.add('has-price');
+  } else {
+    chip.textContent = 'Configure your build';
+    chip.classList.remove('has-price');
+  }
+}
+
+function goStep(n) {
+  document.getElementById('step-' + step).classList.remove('active');
+  step = n;
+  document.getElementById('step-' + step).classList.add('active');
+  document.getElementById('step-label').textContent = n <= 5 ? 'Step ' + n + ' of 5' : '';
+  const dots = document.querySelectorAll('.step-dot');
+  dots.forEach((d, i) => {
+    d.className = 'step-dot' + (i < n - 1 ? ' done' : i === n - 1 ? ' active' : '');
+  });
+  if (n === 3) renderAddons();
+  if (n === 5) renderReview();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── Render models ───
+function renderModels() {
+  document.getElementById('model-grid').innerHTML = MODELS.map(m => `
+    <div class="model-card${S.model === m.id ? ' selected' : ''}" onclick="pickModel('${m.id}')">
+      <div class="selected-check">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6l3 3 5-6" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="model-badge ${m.badgeClass}">${m.badge}</span>
+      <div class="model-name">${m.name}</div>
+      <div class="model-dim">${m.dim}</div>
+      <div class="model-price">${fmt(m.price)}</div>
+      <div class="model-cap">${m.cap}</div>
+      <div class="model-includes">${m.includes}</div>
+    </div>`).join('');
+}
+
+function pickModel(id) {
+  S.model = id;
+  S.addons = new Set();
+  renderModels();
+  updateTotalChip();
+  setTimeout(() => goStep(2), 180);
+}
+
+// ─── Render option grids ───
+function renderOpts(containerId, items, key) {
+  document.getElementById(containerId).innerHTML = items.map(item => `
+    <div class="opt-chip${S[key] === item.id ? ' selected' : ''}" onclick="pickOpt('${key}','${item.id}')">
+      <div class="opt-chip-name">${item.name}</div>
+      <div class="opt-chip-price">${item.price === 0 ? 'Included' : '+' + fmt(item.price)}</div>
+    </div>`).join('');
+}
+
+function pickOpt(key, id) {
+  S[key] = id;
+  const map = { exterior: ['ext-grid', EXTERIORS], interior: ['int-grid', INTERIORS], heater: ['heat-grid', HEATERS], bench: ['bench-grid', BENCHES] };
+  if (map[key]) renderOpts(map[key][0], map[key][1], key);
+  updateTotalChip();
+}
+
+// ─── Render add-ons ───
+function renderAddons() {
+  const m = MODELS.find(x => x.id === S.model);
+  if (!m) return;
+  const cats = {};
+  m.addons.forEach(id => {
+    const a = ADDON_DEFS[id];
+    if (!a) return;
+    if (!cats[a.cat]) cats[a.cat] = [];
+    cats[a.cat].push({ id, ...a });
+  });
+
+  // Show "included" pill for models with plunge built in
+  let html = '';
+  if (S.model === 'primitive-retreat' || S.model === 'thermal-suite') {
+    html += `<div class="included-pill">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+        <path d="M2 6l3 3 5-6" stroke="#2d6a4f" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      Cold plunge included in base price
+    </div>`;
+  }
+
+  Object.entries(cats).forEach(([cat, items]) => {
+    html += `<div class="section-label" style="margin-top:1rem">${cat}</div>`;
+    items.forEach(a => {
+      const on = S.addons.has(a.id);
+      if (a.toggle) {
+        html += `<div class="toggle-row${on ? ' selected' : ''}" onclick="toggleAddon('${a.id}')">
+          <div class="toggle-info">
+            <div class="toggle-name">${a.name}</div>
+            ${a.desc ? `<div class="toggle-desc">${a.desc}</div>` : ''}
+          </div>
+          <span class="toggle-price">+${fmt(a.price)}</span>
+          <div class="switch${on ? ' on' : ''}"><div class="knob"></div></div>
+        </div>`;
+      } else {
+        html += `<div class="addon-row${on ? ' selected' : ''}" onclick="toggleAddon('${a.id}')">
+          <div class="checkbox">
+            ${on ? `<svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+              <path d="M2 5.5l3 3 4-5.5" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>` : ''}
+          </div>
+          <span class="addon-label">${a.name}</span>
+          <span class="addon-price">+${fmt(a.price)}</span>
+        </div>`;
+      }
+    });
+  });
+
+  if (!html) html = '<p style="font-size:14px;color:#6b6460">All features are included in your selected model.</p>';
+  document.getElementById('addons-container').innerHTML = html;
+}
+
+function toggleAddon(id) {
+  if (S.addons.has(id)) S.addons.delete(id); else S.addons.add(id);
+  renderAddons();
+  updateTotalChip();
+}
+
+// ─── To review ───
+function toReview() {
+  const fn = document.getElementById('f-first').value.trim();
+  const em = document.getElementById('f-email').value.trim();
+  if (!fn) { alert('Please enter your first name.'); return; }
+  if (!em || !em.includes('@')) { alert('Please enter a valid email address.'); return; }
+  goStep(5);
+}
+
+// ─── Render review ───
+function renderReview() {
+  const m = MODELS.find(x => x.id === S.model);
+  const ext = EXTERIORS.find(x => x.id === S.exterior);
+  const int_ = INTERIORS.find(x => x.id === S.interior);
+  const heat = HEATERS.find(x => x.id === S.heater);
+  const bench = BENCHES.find(x => x.id === S.bench);
+  const fn = document.getElementById('f-first').value;
+  const ln = document.getElementById('f-last').value;
+  const em = document.getElementById('f-email').value;
+  const ph = document.getElementById('f-phone').value;
+  const ad = document.getElementById('f-address').value;
+
+  let addonRows = '';
+  S.addons.forEach(id => {
+    const a = ADDON_DEFS[id];
+    addonRows += `<div class="review-row"><span class="review-key">${a.name}</span><span class="review-val">+${fmt(a.price)}</span></div>`;
+  });
+
+  document.getElementById('review-content').innerHTML = `
+    <div class="review-card">
+      <div class="review-section">
+        <div class="review-section-title">Model</div>
+        <div class="review-row headline">
+          <span class="review-key">${m.name}</span>
+          <span class="review-val">${fmt(m.price)}</span>
+        </div>
+        <div class="review-row">
+          <span class="review-key" style="font-size:11px">${m.sku} · ${m.dim}</span>
+        </div>
+      </div>
+      <div class="review-section">
+        <div class="review-section-title">Specifications</div>
+        <div class="review-row"><span class="review-key">Exterior</span><span class="review-val">${ext.name}${ext.price ? ' (+' + fmt(ext.price) + ')' : ''}</span></div>
+        <div class="review-row"><span class="review-key">Interior</span><span class="review-val">${int_.name}${int_.price ? ' (+' + fmt(int_.price) + ')' : ''}</span></div>
+        <div class="review-row"><span class="review-key">Heater</span><span class="review-val">${heat.name}${heat.price ? ' (+' + fmt(heat.price) + ')' : ''}</span></div>
+        <div class="review-row"><span class="review-key">Bench layout</span><span class="review-val">${bench.name}</span></div>
+      </div>
+      ${S.addons.size > 0 ? `<div class="review-section"><div class="review-section-title">Add-ons</div>${addonRows}</div>` : ''}
+      <div class="review-section">
+        <div class="review-section-title">Contact</div>
+        <div class="review-row"><span class="review-key">Name</span><span class="review-val">${fn} ${ln}</span></div>
+        <div class="review-row"><span class="review-key">Email</span><span class="review-val">${em}</span></div>
+        ${ph ? `<div class="review-row"><span class="review-key">Phone</span><span class="review-val">${ph}</span></div>` : ''}
+        ${ad ? `<div class="review-row"><span class="review-key">Address</span><span class="review-val">${ad}</span></div>` : ''}
+      </div>
+      <div class="review-total">
+        <span class="review-total-label">Estimated total</span>
+        <span class="review-total-price">${fmt(total())}</span>
+      </div>
+    </div>
+    <p class="review-disclaimer">Estimate only. Final price confirmed after site survey. Does not include delivery, crane, or electrical.</p>
+  `;
+}
+
+// ─── Submit ───
+async function submitOrder() {
+  const btn = document.getElementById('submit-btn');
+  btn.textContent = 'Submitting...';
+  btn.disabled = true;
+
+  const m = MODELS.find(x => x.id === S.model);
+  const ext = EXTERIORS.find(x => x.id === S.exterior);
+  const int_ = INTERIORS.find(x => x.id === S.interior);
+  const heat = HEATERS.find(x => x.id === S.heater);
+  const bench = BENCHES.find(x => x.id === S.bench);
+  const addonNames = Array.from(S.addons).map(id => ADDON_DEFS[id].name).join(', ');
+  const addonTotal = Array.from(S.addons).reduce((s, id) => s + ADDON_DEFS[id].price, 0);
+  const upgradeTotal = (ext.price || 0) + (int_.price || 0) + (heat.price || 0);
+
+  const payload = {
+    firstName: document.getElementById('f-first').value.trim(),
+    lastName: document.getElementById('f-last').value.trim(),
+    email: document.getElementById('f-email').value.trim(),
+    phone: document.getElementById('f-phone').value.trim(),
+    address: document.getElementById('f-address').value.trim(),
+    notes: document.getElementById('f-notes').value.trim(),
+    model: m.name,
+    exterior: ext.name,
+    interior: int_.name,
+    heater: heat.name,
+    bench: bench.name,
+    addons: addonNames,
+    basePrice: m.price,
+    upgradesPrice: upgradeTotal,
+    addonsPrice: addonTotal,
+    totalPrice: total()
+  };
+
+  try {
+    const res = await fetch('/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Unknown error');
+  } catch (err) {
+    console.error(err);
+    btn.textContent = 'Submit inquiry →';
+    btn.disabled = false;
+    alert('Something went wrong. Please try again or email us directly.');
+    return;
+  }
+
+  document.getElementById('success-card').innerHTML = `
+    <strong>${payload.firstName} ${payload.lastName}</strong>
+    <span>
+      ${m.name} · ${fmt(total())}<br>
+      ${payload.email}${payload.phone ? '<br>' + payload.phone : ''}
+    </span>
+  `;
+  goStep(6);
+}
+
+// ─── Init ───
+renderModels();
+renderOpts('ext-grid', EXTERIORS, 'exterior');
+renderOpts('int-grid', INTERIORS, 'interior');
+renderOpts('heat-grid', HEATERS, 'heater');
+renderOpts('bench-grid', BENCHES, 'bench');
+</script>
+</body>
+</html>

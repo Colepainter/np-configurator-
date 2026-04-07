@@ -1,0 +1,9 @@
+{
+  "name": "np-configurator",
+  "version": "1.0.0",
+  "description": "New Primitive product configurator with Airtable backend",
+  "private": true,
+  "engines": {
+    "node": "18.x"
+  }
+}
