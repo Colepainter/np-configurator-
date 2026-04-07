@@ -1,9 +1,7 @@
 {
   "name": "np-configurator",
-  "version": "1.0.0",
-  "description": "New Primitive product configurator with Airtable backend",
+  "version": "2.0.0",
+  "description": "New Primitive product configurator with live Airtable pricing",
   "private": true,
-  "engines": {
-    "node": "24.x"
-  }
+  "engines": { "node": "24.x" }
 }
