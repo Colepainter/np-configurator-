@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Design Yours — New Primitive°</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #0a0a0a;
+  --white: #ffffff;
+  --gray-50: #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #e5e5e5;
+  --gray-300: #d4d4d4;
+  --gray-400: #a3a3a3;
+  --gray-500: #737373;
+  --gray-600: #525252;
+  --gray-800: #262626;
+  --blue: #3b82f6;
+  --green: #22c55e;
+  --gold: #c4a87a;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--white);
+  color: var(--black);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Top Bar ─── */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--gray-200);
+  padding: 0 2rem;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.topbar-logo {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--black);
+  text-decoration: none;
+}
+.topbar-logo span { font-size: 9px; vertical-align: super; color: var(--gold); }
+.topbar-steps {
+  display: flex;
+  gap: 0;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.topbar-step {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gray-400);
+  padding: 16px 20px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+.topbar-step.active {
+  color: var(--black);
+  border-bottom-color: var(--black);
+}
+.topbar-step.done { color: var(--gray-600); }
+.topbar-price {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--black);
+}
+
+/* ─── Layout ─── */
+.config-layout {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  min-height: calc(100vh - 52px);
+}
+
+/* ─── Product Image ─── */
+.config-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gray-50);
+  position: sticky;
+  top: 52px;
+  height: calc(100vh - 52px);
+  overflow: hidden;
+}
+.config-image img {
+  max-width: 85%;
+  max-height: 70%;
+  object-fit: contain;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.config-image .placeholder {
+  width: 80%;
+  max-width: 600px;
+  aspect-ratio: 16/10;
+  background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gray-400);
+  font-size: 15px;
+  font-weight: 400;
+}
+
+/* ─── Options Panel ─── */
+.config-panel {
+  border-left: 1px solid var(--gray-200);
+  padding: 2.5rem 2rem;
+  overflow-y: auto;
+  max-height: calc(100vh - 52px);
+  position: sticky;
+  top: 52px;
+}
+
+.step-view { display: none; }
+.step-view.active { display: block; animation: fadeIn 0.4s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+.step-heading {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+}
+.step-desc {
+  font-size: 14px;
+  color: var(--gray-500);
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+/* Option Cards */
+.option-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 2rem; }
+.option-group-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gray-500);
+  margin-bottom: 4px;
+}
+
+.option-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+.option-card:hover { border-color: var(--gray-400); }
+.option-card.selected {
+  border-color: var(--black);
+  background: var(--gray-50);
+}
+.option-card.selected::after {
+  content: '';
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 20px;
+  height: 20px;
+  background: var(--black);
+  border-radius: 50%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 12l4 4 8-8'/%3E%3C/svg%3E");
+  background-size: 14px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.option-swatch {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  border: 1px solid var(--gray-200);
+}
+.option-info { flex: 1; }
+.option-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--black);
+}
+.option-detail {
+  font-size: 12px;
+  color: var(--gray-500);
+  margin-top: 2px;
+}
+.option-price {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--gray-600);
+  flex-shrink: 0;
+}
+.option-price.included { color: var(--green); }
+
+/* Color Swatches (inline) */
+.swatch-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+.swatch {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 3px solid transparent;
+  transition: all 0.2s;
+  position: relative;
+}
+.swatch:hover { transform: scale(1.08); }
+.swatch.selected { border-color: var(--black); }
+.swatch-label {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: var(--gray-500);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.swatch:hover .swatch-label,
+.swatch.selected .swatch-label { opacity: 1; }
+
+/* Addon checkboxes */
+.addon-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 10px;
+}
+.addon-card:hover { border-color: var(--gray-400); }
+.addon-card.checked {
+  border-color: var(--black);
+  background: var(--gray-50);
+}
+.addon-check {
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--gray-300);
+  border-radius: 6px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.addon-card.checked .addon-check {
+  background: var(--black);
+  border-color: var(--black);
+}
+.addon-card.checked .addon-check::after {
+  content: '';
+  width: 12px;
+  height: 12px;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 12l4 4 8-8'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+/* ─── Navigation Buttons ─── */
+.step-nav {
+  display: flex;
+  gap: 12px;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--gray-200);
+}
+.btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 14px 32px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+  text-align: center;
+}
+.btn-next {
+  background: var(--black);
+  color: var(--white);
+}
+.btn-next:hover { background: var(--gray-800); transform: scale(1.01); }
+.btn-back {
+  background: var(--gray-100);
+  color: var(--black);
+}
+.btn-back:hover { background: var(--gray-200); }
+.btn-submit {
+  background: #1d4ed8;
+  color: var(--white);
+}
+.btn-submit:hover { background: #1e40af; }
+
+/* ─── Summary Step ─── */
+.summary-section {
+  margin-bottom: 1.5rem;
+}
+.summary-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gray-500);
+  margin-bottom: 6px;
+}
+.summary-value {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--black);
+}
+.summary-price {
+  font-size: 13px;
+  color: var(--gray-500);
+}
+.summary-divider {
+  border: none;
+  border-top: 1px solid var(--gray-200);
+  margin: 1.5rem 0;
+}
+.summary-total {
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Form fields */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+.form-field { display: flex; flex-direction: column; gap: 4px; }
+.form-field.full { grid-column: 1 / -1; }
+.form-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gray-600);
+}
+.form-input {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-input:focus { border-color: var(--black); }
+textarea.form-input { resize: vertical; min-height: 80px; }
+
+/* ─── Loading State ─── */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 0;
+  color: var(--gray-400);
+  font-size: 14px;
+}
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--gray-200);
+  border-top-color: var(--black);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin-right: 10px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .config-layout {
+    grid-template-columns: 1fr;
+  }
+  .config-image {
+    position: relative;
+    top: 0;
+    height: 40vh;
+    min-height: 280px;
+  }
+  .config-panel {
+    position: relative;
+    top: 0;
+    max-height: none;
+    border-left: none;
+    border-top: 1px solid var(--gray-200);
+  }
+  .topbar-steps { display: none; }
+}
+
+@media (max-width: 480px) {
+  .config-panel { padding: 1.5rem 1rem; }
+  .form-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Top Bar -->
+<header class="topbar">
+  <a href="index.html" class="topbar-logo">New Primitive<span>&deg;</span></a>
+  <div class="topbar-steps" id="stepTabs"></div>
+  <div class="topbar-price" id="topPrice">$0</div>
+</header>
+
+<!-- Main Layout -->
+<div class="config-layout">
+
+  <!-- Product Image -->
+  <div class="config-image" id="productImage">
+    <div class="placeholder" id="imagePlaceholder">Select a model to begin</div>
+  </div>
+
+  <!-- Options Panel -->
+  <div class="config-panel" id="configPanel">
+    <div class="loading" id="loadingState">
+      <div class="spinner"></div>
+      Loading pricing...
+    </div>
+
+    <!-- Step 1: Model -->
+    <div class="step-view" data-step="0">
+      <h2 class="step-heading">Choose Your Model</h2>
+      <p class="step-desc">Every New Primitive space is hand-built to order. Select the foundation for your wellness sanctuary.</p>
+      <div class="option-group" id="modelOptions"></div>
+      <div class="step-nav">
+        <button class="btn btn-next" onclick="nextStep()">Continue</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Exterior -->
+    <div class="step-view" data-step="1">
+      <h2 class="step-heading">Exterior</h2>
+      <p class="step-desc">Select exterior cladding for your build.</p>
+      <div class="option-group" id="exteriorOptions"></div>
+      <div class="step-nav">
+        <button class="btn btn-back" onclick="prevStep()">Back</button>
+        <button class="btn btn-next" onclick="nextStep()">Continue</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Interior -->
+    <div class="step-view" data-step="2">
+      <h2 class="step-heading">Interior Wood</h2>
+      <p class="step-desc">Choose the wood species for your interior benches and walls.</p>
+      <div class="option-group" id="interiorOptions"></div>
+      <div class="step-nav">
+        <button class="btn btn-back" onclick="prevStep()">Back</button>
+        <button class="btn btn-next" onclick="nextStep()">Continue</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Heater -->
+    <div class="step-view" data-step="3">
+      <h2 class="step-heading">Heater</h2>
+      <p class="step-desc">The heart of your sauna. Choose the heater that fits your ritual.</p>
+      <div class="option-group" id="heaterOptions"></div>
+      <div class="step-nav">
+        <button class="btn btn-back" onclick="prevStep()">Back</button>
+        <button class="btn btn-next" onclick="nextStep()">Continue</button>
+      </div>
+    </div>
+
+    <!-- Step 5: Add-ons -->
+    <div class="step-view" data-step="4">
+      <h2 class="step-heading">Add-ons</h2>
+      <p class="step-desc">A sauna is only the start. Add a cold plunge tub, outdoor shower, or recovery elements to create a sanctuary you won't want to leave.</p>
+      <div class="option-group" id="addonOptions"></div>
+      <div class="step-nav">
+        <button class="btn btn-back" onclick="prevStep()">Back</button>
+        <button class="btn btn-next" onclick="nextStep()">Review Build</button>
+      </div>
+    </div>
+
+    <!-- Step 6: Summary + Contact -->
+    <div class="step-view" data-step="5">
+      <h2 class="step-heading">Your Build</h2>
+      <p class="step-desc">Review your configuration. Our team will follow up within 24 hours to discuss your project, timeline, and next steps.</p>
+
+      <div id="summaryContent"></div>
+
+      <hr class="summary-divider">
+
+      <div class="form-grid">
+        <div class="form-field">
+          <label class="form-label">First Name *</label>
+          <input class="form-input" id="firstName" required>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Last Name</label>
+          <input class="form-input" id="lastName">
+        </div>
+        <div class="form-field">
+          <label class="form-label">Email *</label>
+          <input class="form-input" id="email" type="email" required>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Phone</label>
+          <input class="form-input" id="phone" type="tel">
+        </div>
+        <div class="form-field full">
+          <label class="form-label">Shipping Address</label>
+          <input class="form-input" id="address">
+        </div>
+        <div class="form-field full">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="notes" placeholder="Any special requests or questions..."></textarea>
+        </div>
+      </div>
+
+      <div class="step-nav">
+        <button class="btn btn-back" onclick="prevStep()">Back</button>
+        <button class="btn btn-submit" id="submitBtn" onclick="submitOrder()">Place Order Request</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STEPS = ['Model', 'Exterior', 'Interior', 'Heater', 'Add-ons', 'Summary'];
+let currentStep = 0;
+let pricing = null;
+
+// Selections state
+const state = {
+  model: null,
+  exterior: null,
+  interior: null,
+  heater: null,
+  addons: [],
+};
+
+// ─── Init ───
+async function init() {
+  renderTabs();
+
+  // Check URL for pre-selected model
+  const params = new URLSearchParams(window.location.search);
+  const preselect = params.get('model');
+
+  try {
+    const res = await fetch('/api/pricing');
+    const data = await res.json();
+    if (!data.success) throw new Error('API error');
+    pricing = data.pricing;
+
+    document.getElementById('loadingState').style.display = 'none';
+    renderAllOptions();
+
+    // Pre-select model from URL
+    if (preselect && pricing.models.length) {
+      const match = pricing.models.find(m =>
+        m.name.toLowerCase().replace(/[\s+]/g, '').includes(preselect.toLowerCase().replace(/[\s+]/g, ''))
+      );
+      if (match) selectModel(match);
+    }
+
+    showStep(0);
+  } catch (err) {
+    document.getElementById('loadingState').innerHTML =
+      '<span style="color:#ef4444">Failed to load pricing. Please refresh.</span>';
+    console.error(err);
+  }
+}
+
+// ─── Tab Navigation ───
+function renderTabs() {
+  const tabs = document.getElementById('stepTabs');
+  tabs.innerHTML = STEPS.map((name, i) =>
+    `<div class="topbar-step${i === 0 ? ' active' : ''}" data-tab="${i}" onclick="goToStep(${i})">${name}</div>`
+  ).join('');
+}
+
+function updateTabs() {
+  document.querySelectorAll('.topbar-step').forEach((tab, i) => {
+    tab.classList.toggle('active', i === currentStep);
+    tab.classList.toggle('done', i < currentStep);
+  });
+}
+
+// ─── Step Navigation ───
+function showStep(n) {
+  currentStep = n;
+  document.querySelectorAll('.step-view').forEach(v => v.classList.remove('active'));
+  const target = document.querySelector(`.step-view[data-step="${n}"]`);
+  if (target) target.classList.add('active');
+  updateTabs();
+
+  if (n === 5) renderSummary();
+  updatePrice();
+}
+
+function nextStep() { if (currentStep < STEPS.length - 1) showStep(currentStep + 1); }
+function prevStep() { if (currentStep > 0) showStep(currentStep - 1); }
+function goToStep(n) { if (n <= currentStep || n === currentStep + 1) showStep(n); }
+
+// ─── Render Options ───
+function renderAllOptions() {
+  renderModelCards();
+  renderOptionCards('exteriorOptions', pricing.exteriors, 'exterior');
+  renderOptionCards('interiorOptions', pricing.interiors, 'interior');
+  renderOptionCards('heaterOptions', pricing.heaters, 'heater');
+  renderAddonCards();
+}
+
+function renderModelCards() {
+  const container = document.getElementById('modelOptions');
+  const imageMap = {
+    'nook': 'images/NookPlus.png',
+    '212': 'images/212PLUS.png',
+    'thermal': 'images/ThermalSuite.png',
+    'plunge': 'images/Primitiveretreat.png',
+    'cold': 'images/Primitiveretreat.png',
+  };
+
+  container.innerHTML = pricing.models.map(m => `
+    <div class="option-card${state.model?.id === m.id ? ' selected' : ''}"
+         onclick="selectModel(${JSON.stringify(m).replace(/"/g, '&quot;')})">
+      <div class="option-swatch" style="background: linear-gradient(135deg, #2c2520, #1a1510); border-radius: 8px;"></div>
+      <div class="option-info">
+        <div class="option-name">${m.name}</div>
+        <div class="option-detail">${m.description || ''}</div>
+      </div>
+      <div class="option-price">$${m.price.toLocaleString()}</div>
+    </div>
+  `).join('');
+}
+
+function selectModel(item) {
+  state.model = item;
+  renderModelCards();
+  updateProductImage();
+  updatePrice();
+}
+
+function renderOptionCards(containerId, items, key) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = items.map(item => {
+    const isSelected = state[key]?.id === item.id;
+    const priceLabel = item.price === 0
+      ? '<span class="option-price included">Included</span>'
+      : `<span class="option-price">+$${item.price.toLocaleString()}</span>`;
+
+    return `
+      <div class="option-card${isSelected ? ' selected' : ''}"
+           onclick="selectOption('${key}', ${JSON.stringify(item).replace(/"/g, '&quot;')}, '${containerId}')">
+        ${item.imageUrl ? `<div class="option-swatch" style="background-image: url('${item.imageUrl}'); background-size: cover;"></div>` : ''}
+        <div class="option-info">
+          <div class="option-name">${item.name}</div>
+          <div class="option-detail">${item.description || ''}</div>
+        </div>
+        ${priceLabel}
+      </div>
+    `;
+  }).join('');
+}
+
+function selectOption(key, item, containerId) {
+  state[key] = item;
+  renderOptionCards(containerId, pricing[key === 'exterior' ? 'exteriors' : key === 'interior' ? 'interiors' : 'heaters'], key);
+  updatePrice();
+}
+
+function renderAddonCards() {
+  const container = document.getElementById('addonOptions');
+  container.innerHTML = pricing.addons.map(item => {
+    const isChecked = state.addons.find(a => a.id === item.id);
+    return `
+      <div class="addon-card${isChecked ? ' checked' : ''}"
+           onclick="toggleAddon(${JSON.stringify(item).replace(/"/g, '&quot;')})">
+        <div class="addon-check"></div>
+        <div class="option-info">
+          <div class="option-name">${item.name}</div>
+          <div class="option-detail">${item.description || ''}</div>
+        </div>
+        <span class="option-price">+$${item.price.toLocaleString()}</span>
+      </div>
+    `;
+  }).join('');
+}
+
+function toggleAddon(item) {
+  const idx = state.addons.findIndex(a => a.id === item.id);
+  if (idx >= 0) state.addons.splice(idx, 1);
+  else state.addons.push(item);
+  renderAddonCards();
+  updatePrice();
+}
+
+// ─── Product Image ───
+function updateProductImage() {
+  const imageMap = {
+    'nook': 'images/NookPlus.png',
+    '212': 'images/212PLUS.png',
+    'thermal': 'images/ThermalSuite.png',
+    'plunge': 'images/Primitiveretreat.png',
+    'cold': 'images/Primitiveretreat.png',
+  };
+
+  const container = document.getElementById('productImage');
+  if (!state.model) return;
+
+  const key = Object.keys(imageMap).find(k => state.model.name.toLowerCase().includes(k));
+  if (key) {
+    container.innerHTML = `<img src="${imageMap[key]}" alt="${state.model.name}" onerror="this.parentElement.innerHTML='<div class=placeholder>${state.model.name}</div>'">`;
+  } else {
+    container.innerHTML = `<div class="placeholder">${state.model.name}</div>`;
+  }
+}
+
+// ─── Price ───
+function getTotal() {
+  let base = state.model?.price || 0;
+  let upgrades = (state.exterior?.price || 0) + (state.interior?.price || 0) + (state.heater?.price || 0);
+  let addons = state.addons.reduce((sum, a) => sum + a.price, 0);
+  return { base, upgrades, addons, total: base + upgrades + addons };
+}
+
+function updatePrice() {
+  const { total } = getTotal();
+  document.getElementById('topPrice').textContent = total > 0 ? `$${total.toLocaleString()}` : '$0';
+}
+
+// ─── Summary ───
+function renderSummary() {
+  const { base, upgrades, addons, total } = getTotal();
+  const addonNames = state.addons.map(a => a.name).join(', ') || 'None';
+
+  document.getElementById('summaryContent').innerHTML = `
+    <div class="summary-section">
+      <div class="summary-label">Model</div>
+      <div class="summary-value">${state.model?.name || 'Not selected'}</div>
+      <div class="summary-price">$${base.toLocaleString()}</div>
+    </div>
+    <div class="summary-section">
+      <div class="summary-label">Exterior</div>
+      <div class="summary-value">${state.exterior?.name || 'Not selected'}</div>
+      ${state.exterior?.price ? `<div class="summary-price">+$${state.exterior.price.toLocaleString()}</div>` : ''}
+    </div>
+    <div class="summary-section">
+      <div class="summary-label">Interior</div>
+      <div class="summary-value">${state.interior?.name || 'Not selected'}</div>
+      ${state.interior?.price ? `<div class="summary-price">+$${state.interior.price.toLocaleString()}</div>` : ''}
+    </div>
+    <div class="summary-section">
+      <div class="summary-label">Heater</div>
+      <div class="summary-value">${state.heater?.name || 'Not selected'}</div>
+      ${state.heater?.price ? `<div class="summary-price">+$${state.heater.price.toLocaleString()}</div>` : ''}
+    </div>
+    <div class="summary-section">
+      <div class="summary-label">Add-ons</div>
+      <div class="summary-value">${addonNames}</div>
+      ${addons > 0 ? `<div class="summary-price">+$${addons.toLocaleString()}</div>` : ''}
+    </div>
+    <hr class="summary-divider">
+    <div class="summary-section">
+      <div class="summary-label">Estimated Total</div>
+      <div class="summary-total">$${total.toLocaleString()}</div>
+    </div>
+  `;
+}
+
+// ─── Submit ───
+async function submitOrder() {
+  const firstName = document.getElementById('firstName').value.trim();
+  const email = document.getElementById('email').value.trim();
+
+  if (!firstName || !email) {
+    alert('Please enter your name and email.');
+    return;
+  }
+  if (!state.model) {
+    alert('Please select a model.');
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.textContent = 'Submitting...';
+  btn.disabled = true;
+
+  const { base, upgrades, addons, total } = getTotal();
+
+  try {
+    const res = await fetch('/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        firstName,
+        lastName: document.getElementById('lastName').value.trim(),
+        email,
+        phone: document.getElementById('phone').value.trim(),
+        address: document.getElementById('address').value.trim(),
+        model: state.model?.name || '',
+        exterior: state.exterior?.name || '',
+        interior: state.interior?.name || '',
+        heater: state.heater?.name || '',
+        bench: '',
+        addons: state.addons.map(a => a.name).join(', '),
+        basePrice: base,
+        upgradesPrice: upgrades,
+        addonsPrice: addons,
+        totalPrice: total,
+        notes: document.getElementById('notes').value.trim(),
+      }),
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('configPanel').innerHTML = `
+        <div style="text-align: center; padding: 4rem 2rem;">
+          <div style="font-size: 48px; margin-bottom: 1rem;">&#10003;</div>
+          <h2 class="step-heading" style="margin-bottom: 8px;">Request Received</h2>
+          <p class="step-desc">Thank you, ${firstName}. Our team will be in touch within 24 hours to discuss your ${state.model.name} build, timeline, and next steps.</p>
+          <p style="font-size: 13px; color: var(--gray-500); margin-top: 1rem;">Questions? Reach us at <a href="mailto:Hello@newprimitive.life" style="color: var(--black);">Hello@newprimitive.life</a> or <a href="tel:8016147282" style="color: var(--black);">(801) 614-7282</a></p>
+          <a href="index.html" class="btn btn-next" style="display: inline-block; margin-top: 2rem; text-decoration: none;">Back to Home</a>
+        </div>
+      `;
+    } else {
+      throw new Error(data.error);
+    }
+  } catch (err) {
+    btn.textContent = 'Place Order Request';
+    btn.disabled = false;
+    alert('Something went wrong. Please try again.');
+    console.error(err);
+  }
+}
+
+// Boot
+init();
+</script>
+</body>
+</html>

@@ -1,12 +1,784 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>New Primitive Configurator</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>New Primitive° — Luxury Sauna & Cold Plunge Spaces</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #0a0a0a;
+  --white: #ffffff;
+  --gray-100: #f5f5f5;
+  --gray-200: #e5e5e5;
+  --gray-400: #a3a3a3;
+  --gray-600: #525252;
+  --gray-800: #262626;
+  --bone: #f5f2ed;
+  --gold: #c4a87a;
+  --gold-hover: #b89560;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--black);
+  color: var(--white);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ─── Navigation ─── */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2.5rem;
+  height: 56px;
+  background: transparent;
+  transition: background 0.4s ease;
+}
+.nav.scrolled {
+  background: rgba(10, 10, 10, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.nav-logo {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--white);
+  text-decoration: none;
+}
+.nav-logo span {
+  font-weight: 300;
+  font-size: 10px;
+  vertical-align: super;
+  margin-left: 1px;
+  color: var(--gold);
+}
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+}
+.nav-links a {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--white);
+  text-decoration: none;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+  letter-spacing: 0.02em;
+}
+.nav-links a:hover { opacity: 1; }
+.nav-cta {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--black);
+  background: var(--white);
+  padding: 8px 20px;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: background 0.3s, transform 0.2s;
+}
+.nav-cta:hover {
+  background: var(--gray-200);
+  transform: scale(1.02);
+}
+
+/* ─── Hamburger (mobile) ─── */
+.nav-hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  padding: 4px;
+  background: none;
+  border: none;
+}
+.nav-hamburger span {
+  width: 22px;
+  height: 1.5px;
+  background: var(--white);
+  transition: all 0.3s;
+}
+
+/* Mobile menu */
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: 56px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(10, 10, 10, 0.97);
+  backdrop-filter: blur(20px);
+  z-index: 999;
+  padding: 2rem;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.mobile-menu.open { display: flex; }
+.mobile-menu a {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--white);
+  text-decoration: none;
+  opacity: 0.8;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.mobile-menu a:hover { opacity: 1; }
+
+/* ─── Hero Sections ─── */
+.hero {
+  height: 100vh;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transition: transform 8s ease-out;
+}
+.hero:hover .hero-bg { transform: scale(1.03); }
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.35) 0%,
+    rgba(0,0,0,0.05) 30%,
+    rgba(0,0,0,0.05) 60%,
+    rgba(0,0,0,0.5) 100%
+  );
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding-top: 18vh;
+  max-width: 720px;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+.hero-title {
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin-bottom: 14px;
+}
+.hero-subtitle {
+  font-size: clamp(14px, 1.8vw, 17px);
+  font-weight: 300;
+  color: rgba(255,255,255,0.75);
+  letter-spacing: 0.01em;
+  line-height: 1.6;
+}
+.hero-specs {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+.hero-spec {
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.02em;
+}
+.hero-spec strong {
+  color: rgba(255,255,255,0.8);
+  font-weight: 500;
+}
+
+.hero-actions {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  gap: 16px;
+  padding-bottom: 10vh;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.btn-primary {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 12px 56px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  letter-spacing: 0.02em;
+}
+.btn-order {
+  background: rgba(255,255,255,0.92);
+  color: var(--black);
+}
+.btn-order:hover {
+  background: var(--white);
+  transform: scale(1.02);
+}
+.btn-learn {
+  background: rgba(255,255,255,0.12);
+  color: var(--white);
+  backdrop-filter: blur(8px);
+}
+.btn-learn:hover {
+  background: rgba(255,255,255,0.2);
+  transform: scale(1.02);
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 3vh;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  animation: bounce 2s infinite;
+  opacity: 0.5;
+}
+.scroll-indicator svg { width: 28px; height: 28px; }
+@keyframes bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(8px); }
+}
+
+/* Hero backgrounds */
+.hero-intro .hero-bg {
+  background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 40%, #1c1915 100%);
+}
+.hero-nook .hero-bg {
+  background: linear-gradient(160deg, #2c2520 0%, #1a1510 50%, #0a0a08 100%);
+  background-image: url('images/NookPlus.png');
+  background-size: cover;
+  background-position: center;
+}
+.hero-212 .hero-bg {
+  background: linear-gradient(160deg, #1a2025 0%, #101518 50%, #0a0a0a 100%);
+  background-image: url('images/212PLUS.png');
+  background-size: cover;
+  background-position: center;
+}
+.hero-thermal .hero-bg {
+  background: linear-gradient(160deg, #252025 0%, #18121a 50%, #0a0a0a 100%);
+  background-image: url('images/ThermalSuite.png');
+  background-size: cover;
+  background-position: center;
+}
+.hero-plunge .hero-bg {
+  background: linear-gradient(160deg, #152025 0%, #0a1518 50%, #0a0a0a 100%);
+  background-image: url('images/Primitiveretreat.png');
+  background-size: cover;
+  background-position: center;
+}
+
+/* ─── Features Strip ─── */
+.features-strip {
+  scroll-snap-align: start;
+  background: var(--white);
+  color: var(--black);
+  padding: 5rem 2.5rem;
+}
+.features-strip-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.features-strip h2 {
+  font-size: clamp(28px, 3.5vw, 42px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+.features-strip .section-sub {
+  text-align: center;
+  font-size: 15px;
+  color: var(--gray-600);
+  margin-bottom: 3rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+}
+.feature-card {
+  text-align: center;
+  padding: 2rem 1.5rem;
+}
+.feature-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 1rem;
+  background: var(--gray-100);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.feature-icon svg { width: 24px; height: 24px; stroke: var(--black); fill: none; }
+.feature-card h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.feature-card p {
+  font-size: 13px;
+  color: var(--gray-600);
+  line-height: 1.5;
+}
+
+/* ─── Process Section ─── */
+.process-section {
+  scroll-snap-align: start;
+  background: var(--black);
+  padding: 5rem 2.5rem;
+}
+.process-inner {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.process-section h2 {
+  font-size: clamp(28px, 3.5vw, 42px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+.process-section .section-sub {
+  text-align: center;
+  font-size: 15px;
+  color: var(--gray-400);
+  margin-bottom: 3.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 500;
+  font-size: 12px;
+}
+.process-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+.process-step {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+}
+.process-num {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+.process-step h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.process-step p {
+  font-size: 14px;
+  color: var(--gray-400);
+  line-height: 1.6;
+}
+
+/* ─── CTA Section ─── */
+.cta-section {
+  scroll-snap-align: start;
+  background: var(--white);
+  color: var(--black);
+  padding: 6rem 2.5rem;
+  text-align: center;
+}
+.cta-section h2 {
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+  line-height: 1.1;
+}
+.cta-section p {
+  font-size: 17px;
+  color: var(--gray-600);
+  max-width: 560px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.6;
+}
+.cta-btn {
+  display: inline-block;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 16px 48px;
+  background: var(--black);
+  color: var(--white);
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.3s;
+  letter-spacing: 0.02em;
+}
+.cta-btn:hover { background: var(--gray-800); transform: scale(1.02); }
+
+/* ─── Footer ─── */
+.footer {
+  background: var(--black);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 3rem 2.5rem 2rem;
+  scroll-snap-align: end;
+}
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+.footer-brand .footer-logo {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+.footer-brand .footer-logo span { color: var(--gold); font-size: 9px; vertical-align: super; }
+.footer-brand p {
+  font-size: 12px;
+  color: var(--gray-400);
+  line-height: 1.6;
+  max-width: 280px;
+}
+.footer-col h4 {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gray-400);
+  margin-bottom: 1rem;
+}
+.footer-col a {
+  display: block;
+  font-size: 13px;
+  color: var(--gray-400);
+  text-decoration: none;
+  margin-bottom: 0.5rem;
+  transition: color 0.3s;
+}
+.footer-col a:hover { color: var(--white); }
+.footer-bottom {
+  max-width: 1100px;
+  margin: 2rem auto 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  text-align: center;
+  font-size: 11px;
+  color: var(--gray-600);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .nav { padding: 0 1.25rem; }
+  .nav-links { display: none; }
+  .nav-cta { display: none; }
+  .nav-hamburger { display: flex; }
+  .hero-content { padding-top: 22vh; }
+  .hero-actions { flex-direction: column; align-items: center; padding-bottom: 14vh; }
+  .btn-primary { width: 260px; text-align: center; }
+  .hero-specs { gap: 1rem; }
+  .features-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  .process-steps { grid-template-columns: 1fr; }
+  .footer-inner { flex-direction: column; align-items: center; text-align: center; }
+  .footer-brand p { max-width: none; }
+}
+
+/* ─── Fade-in animations ─── */
+.fade-in {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+</style>
 </head>
 <body>
-  <h1>New Primitive Configurator</h1>
-  <p>Coming soon.</p>
+
+<!-- Navigation -->
+<nav class="nav" id="nav">
+  <a href="/" class="nav-logo">New Primitive<span>&deg;</span></a>
+  <ul class="nav-links">
+    <li><a href="#nook">Nook°</a></li>
+    <li><a href="#two12">212°</a></li>
+    <li><a href="#thermal">Thermal Suite</a></li>
+    <li><a href="#plunge">Cold Plunge</a></li>
+    <li><a href="#about">About</a></li>
+  </ul>
+  <a href="configure.html" class="nav-cta">Design Yours</a>
+  <button class="nav-hamburger" id="hamburger" onclick="toggleMobile()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#nook" onclick="closeMobile()">Nook°</a>
+  <a href="#two12" onclick="closeMobile()">212°</a>
+  <a href="#thermal" onclick="closeMobile()">Thermal Suite</a>
+  <a href="#plunge" onclick="closeMobile()">Cold Plunge</a>
+  <a href="#about" onclick="closeMobile()">About</a>
+  <a href="configure.html">Design Yours</a>
+</div>
+
+<!-- Hero 1: Brand Intro -->
+<section class="hero hero-intro">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content fade-in">
+    <h1 class="hero-title">Luxury Sauna &amp; Cold Plunge Spaces</h1>
+    <p class="hero-subtitle">Warm Up. Cool Down. Restore Balance. Invest in New Primitive designs to craft a daily ritual of grounding, recovery, and intentional living.</p>
+  </div>
+  <div class="hero-actions fade-in">
+    <a href="configure.html" class="btn-primary btn-order">Design Yours</a>
+    <a href="#nook" class="btn-primary btn-learn">Explore Product</a>
+  </div>
+  <div class="scroll-indicator">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M6 9l6 6 6-6"/></svg>
+  </div>
+</section>
+
+<!-- Hero 2: Nook° -->
+<section class="hero hero-nook" id="nook">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content fade-in">
+    <h1 class="hero-title">Nook°</h1>
+    <p class="hero-subtitle">A premium 2–4 person outdoor sauna designed for homeowners who want high-performance heat therapy in a smaller, more efficient design. Perfect for daily relaxation, recovery, and wellness rituals.</p>
+    <div class="hero-specs">
+      <span class="hero-spec"><strong>2–4</strong> Person</span>
+      <span class="hero-spec"><strong>6'3"W</strong> x 8'3"L x 9'4"H</span>
+      <span class="hero-spec">Starting at <strong>$25,000</strong></span>
+    </div>
+  </div>
+  <div class="hero-actions fade-in">
+    <a href="configure.html?model=nook" class="btn-primary btn-order">Design Yours</a>
+    <a href="#" class="btn-primary btn-learn">Learn More</a>
+  </div>
+</section>
+
+<!-- Hero 3: 212° -->
+<section class="hero hero-212" id="two12">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content fade-in">
+    <h1 class="hero-title">212°</h1>
+    <p class="hero-subtitle">A spacious 4–6 person outdoor sauna built for families and groups. Turn your sauna session into a social experience with premium materials, stadium seating, panoramic glass, and customizable options.</p>
+    <div class="hero-specs">
+      <span class="hero-spec"><strong>4–6</strong> Person</span>
+      <span class="hero-spec"><strong>12'3"L</strong> x 8'3"D x 9'5"H</span>
+      <span class="hero-spec">Starting at <strong>$35,000</strong></span>
+    </div>
+  </div>
+  <div class="hero-actions fade-in">
+    <a href="configure.html?model=212" class="btn-primary btn-order">Design Yours</a>
+    <a href="#" class="btn-primary btn-learn">Learn More</a>
+  </div>
+</section>
+
+<!-- Hero 4: Thermal Suite -->
+<section class="hero hero-thermal" id="thermal">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content fade-in">
+    <h1 class="hero-title">Thermal Suite</h1>
+    <p class="hero-subtitle">The ultimate contrast therapy destination. Sauna and cold plunge combined in a beautifully enclosed wellness sanctuary. Built for long-term performance and optimized wellness.</p>
+    <div class="hero-specs">
+      <span class="hero-spec"><strong>4–6</strong> Person</span>
+      <span class="hero-spec"><strong>16'6"L</strong> x 8'3"D x 9'5"H</span>
+      <span class="hero-spec">Starting at <strong>$55,000</strong></span>
+    </div>
+  </div>
+  <div class="hero-actions fade-in">
+    <a href="configure.html?model=thermal" class="btn-primary btn-order">Design Yours</a>
+    <a href="#" class="btn-primary btn-learn">Learn More</a>
+  </div>
+</section>
+
+<!-- Hero 5: Cold Plunge -->
+<section class="hero hero-plunge" id="plunge">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content fade-in">
+    <h1 class="hero-title">Cold Plunge</h1>
+    <p class="hero-subtitle">A tasteful cold plunge that integrates cleanly into any indoor or outdoor environment. Filtration, ozone sanitization, LED lighting, and a 1HP chiller — built for daily immersion.</p>
+    <div class="hero-specs">
+      <span class="hero-spec"><strong>30.5"H</strong> x 27.25"W x 80"L</span>
+      <span class="hero-spec">Starting at <strong>$7,900</strong></span>
+    </div>
+  </div>
+  <div class="hero-actions fade-in">
+    <a href="configure.html?model=plunge" class="btn-primary btn-order">Design Yours</a>
+    <a href="#" class="btn-primary btn-learn">Learn More</a>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="features-strip" id="about">
+  <div class="features-strip-inner">
+    <h2 class="fade-in">Built with Intention. Designed to Last.</h2>
+    <p class="section-sub fade-in">We hand-select every material to optimize heat, longevity, and feel.</p>
+    <div class="features-grid">
+      <div class="feature-card fade-in">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="9" r="1"/><circle cx="15" cy="9" r="1"/></svg>
+        </div>
+        <h3>Stress Relief</h3>
+        <p>Let go of daily tension in your own private escape</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M12 22c5.52 0 10-4.48 10-10S17.52 2 12 2 2 6.48 2 12s4.48 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <h3>Detoxify</h3>
+        <p>Sweat out toxins and reset your system</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+        <h3>Clarity</h3>
+        <p>Boost mental sharpness, circulation, and focus</p>
+      </div>
+      <div class="feature-card fade-in">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+        </div>
+        <h3>Recovery</h3>
+        <p>Reduce soreness and inflammation</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Process -->
+<section class="process-section">
+  <div class="process-inner">
+    <p class="section-sub fade-in">Start to Finish</p>
+    <h2 class="fade-in">The Primitive Process</h2>
+    <div class="process-steps">
+      <div class="process-step fade-in">
+        <div class="process-num">01</div>
+        <h3>Consult</h3>
+        <p>Sit down with our team to discuss your goals and design preferences. We assess your space, vision, and lifestyle.</p>
+      </div>
+      <div class="process-step fade-in">
+        <div class="process-num">02</div>
+        <h3>Design</h3>
+        <p>We develop a fully rendered concept that clarifies layout, flow, and experience. Receive a personalized design and quote.</p>
+      </div>
+      <div class="process-step fade-in">
+        <div class="process-num">03</div>
+        <h3>Deliver</h3>
+        <p>Your sanctuary is built in our pristine factory and delivered ready to be powered on. Professional installation available.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2 class="fade-in">Design Your<br>Wellness Sanctuary</h2>
+  <p class="fade-in">No two homes are the same, and neither are our products. From minimalist designs to rustic retreats, we'll help you create a space that reflects your unique style.</p>
+  <a href="configure.html" class="cta-btn fade-in">Start Building</a>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-logo">New Primitive<span>&deg;</span></div>
+      <p>New Primitive designs and delivers high-end wellness spaces that integrate saunas, cold plunges, recovery, and movement into residential and commercial settings.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <a href="#nook">Nook°</a>
+      <a href="#two12">212°</a>
+      <a href="#thermal">Thermal Suite</a>
+      <a href="#plunge">Cold Plunge</a>
+      <a href="configure.html">Design Yours</a>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <a href="#about">About</a>
+      <a href="#">Residential</a>
+      <a href="#">Commercial</a>
+      <a href="#">FAQ</a>
+    </div>
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <a href="mailto:Hello@newprimitive.life">Hello@newprimitive.life</a>
+      <a href="tel:8016147282">(801) 614-7282</a>
+    </div>
+  </div>
+  <div class="footer-bottom">&copy; 2026 New Primitive&deg; &nbsp;|&nbsp; All rights reserved</div>
+</footer>
+
+<script>
+// Nav background on scroll
+const nav = document.getElementById('nav');
+const observer = new IntersectionObserver(([entry]) => {
+  nav.classList.toggle('scrolled', !entry.isIntersecting);
+}, { threshold: 0.9 });
+observer.observe(document.querySelector('.hero-intro'));
+
+// Fade-in on scroll
+const fadeEls = document.querySelectorAll('.fade-in');
+const fadeObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
+  });
+}, { threshold: 0.15 });
+fadeEls.forEach(el => fadeObserver.observe(el));
+
+// Mobile menu
+function toggleMobile() {
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+function closeMobile() {
+  document.getElementById('mobileMenu').classList.remove('open');
+}
+</script>
 </body>
 </html>
