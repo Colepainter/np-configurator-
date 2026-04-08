@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Command Center — New Primitive°</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0f0e0d;
+  --ink-2: #3a3530;
+  --ink-3: #7a7068;
+  --bone: #f5f2ed;
+  --bone-2: #ede8e1;
+  --bone-3: #e0d9cf;
+  --gold: #c4a87a;
+  --gold-2: #a8885a;
+  --white: #ffffff;
+  --green: #2a4a35;
+  --green-light: #e8f0eb;
+  --red: #8b2020;
+  --red-light: #f5e8e8;
+  --blue: #1a3a5c;
+  --blue-light: #e8eef5;
+  --radius: 10px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bone);
+  color: var(--ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Auth Gate ── */
+#auth-gate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--ink);
+}
+.auth-box {
+  text-align: center;
+  padding: 3rem 2.5rem;
+  background: var(--bone);
+  border-radius: 16px;
+  width: 340px;
+}
+.auth-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+.auth-logo sup { font-size: 12px; color: var(--gold); }
+.auth-sub { font-size: 12px; color: var(--ink-3); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 2rem; }
+.auth-box input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1.5px solid var(--bone-3);
+  border-radius: var(--radius);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  background: var(--white);
+  margin-bottom: 0.75rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.auth-box input:focus { border-color: var(--gold); }
+.auth-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background: var(--ink);
+  color: var(--white);
+  border: none;
+  border-radius: var(--radius);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.auth-btn:hover { background: var(--ink-2); }
+.auth-error { font-size: 12px; color: var(--red); margin-top: 0.5rem; display: none; }
+
+/* ── App Shell ── */
+#app { display: none; }
+
+.header {
+  background: var(--ink);
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--white);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.logo sup { font-size: 11px; color: var(--gold); }
+.header-right { display: flex; align-items: center; gap: 1rem; }
+.header-label {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.refresh-btn {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: var(--white);
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.refresh-btn:hover { background: rgba(255,255,255,0.18); }
+
+/* ── Nav Tabs ── */
+.nav {
+  background: var(--ink-2);
+  padding: 0 2rem;
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.nav-tab {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+.nav-tab:hover { color: rgba(255,255,255,0.75); }
+.nav-tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+
+/* ── Main Layout ── */
+.main { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+
+/* ── Stat Cards ── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.stat-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--bone-3);
+}
+.stat-label {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 0.5rem;
+}
+.stat-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 36px;
+  font-weight: 500;
+  color: var(--ink);
+  line-height: 1;
+}
+.stat-value.gold { color: var(--gold-2); }
+.stat-sub { font-size: 11px; color: var(--ink-3); margin-top: 0.35rem; }
+
+/* ── Section Headers ── */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+.section-count {
+  font-size: 11px;
+  color: var(--ink-3);
+  background: var(--bone-2);
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+/* ── Filter Bar ── */
+.filter-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+.filter-chip {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 1.5px solid var(--bone-3);
+  background: var(--white);
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.filter-chip:hover { border-color: var(--gold); color: var(--ink); }
+.filter-chip.active { background: var(--ink); border-color: var(--ink); color: var(--white); }
+
+/* ── Table ── */
+.table-wrap {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--bone-3);
+  overflow: hidden;
+}
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 0.75rem 1rem;
+  text-align: left;
+  background: var(--bone);
+  border-bottom: 1px solid var(--bone-3);
+  white-space: nowrap;
+}
+tbody tr {
+  border-bottom: 1px solid var(--bone-2);
+  transition: background 0.1s;
+  cursor: pointer;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--bone); }
+tbody td {
+  padding: 0.85rem 1rem;
+  font-size: 13px;
+  color: var(--ink-2);
+  vertical-align: middle;
+}
+.td-name { font-weight: 500; color: var(--ink); }
+.td-model { font-size: 12px; color: var(--ink-3); }
+.td-value { font-weight: 500; }
+.td-date { font-size: 12px; color: var(--ink-3); white-space: nowrap; }
+
+/* ── Status Badges ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.badge-green { background: var(--green-light); color: var(--green); }
+.badge-green::before { background: var(--green); }
+.badge-gold { background: #faf3e8; color: var(--gold-2); }
+.badge-gold::before { background: var(--gold); }
+.badge-blue { background: var(--blue-light); color: var(--blue); }
+.badge-blue::before { background: var(--blue); }
+.badge-red { background: var(--red-light); color: var(--red); }
+.badge-red::before { background: var(--red); }
+.badge-gray { background: var(--bone-2); color: var(--ink-3); }
+.badge-gray::before { background: var(--ink-3); }
+
+/* ── Pipeline Kanban ── */
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.kanban-col {
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--bone-3);
+  overflow: hidden;
+}
+.kanban-header {
+  padding: 0.75rem 1rem;
+  background: var(--bone);
+  border-bottom: 1px solid var(--bone-3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.kanban-stage {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.kanban-n {
+  font-size: 11px;
+  background: var(--bone-3);
+  color: var(--ink-3);
+  padding: 1px 7px;
+  border-radius: 999px;
+}
+.kanban-body { padding: 0.5rem; }
+.kanban-card {
+  background: var(--bone);
+  border-radius: 7px;
+  padding: 0.75rem;
+  margin-bottom: 0.4rem;
+  border: 1px solid var(--bone-3);
+  cursor: pointer;
+  transition: box-shadow 0.15s;
+}
+.kanban-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.kanban-card:last-child { margin-bottom: 0; }
+.kc-name { font-size: 13px; font-weight: 500; color: var(--ink); margin-bottom: 3px; }
+.kc-project { font-size: 11px; color: var(--ink-3); margin-bottom: 6px; }
+.kc-meta { display: flex; align-items: center; justify-content: space-between; }
+.kc-value { font-size: 12px; font-weight: 500; color: var(--gold-2); }
+.kc-conf { font-size: 10px; letter-spacing: 0.05em; padding: 2px 7px; border-radius: 999px; }
+.kc-conf-high { background: var(--green-light); color: var(--green); }
+.kc-conf-med { background: #faf3e8; color: var(--gold-2); }
+.kc-conf-low { background: var(--red-light); color: var(--red); }
+.kc-action { font-size: 11px; color: var(--ink-3); margin-top: 5px; font-style: italic; }
+
+/* ── Detail Drawer ── */
+.drawer-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15,14,13,0.5);
+  z-index: 200;
+}
+.drawer-overlay.open { display: block; }
+.drawer {
+  position: fixed;
+  top: 0;
+  right: -500px;
+  width: 480px;
+  height: 100vh;
+  background: var(--white);
+  z-index: 201;
+  overflow-y: auto;
+  transition: right 0.3s ease;
+  box-shadow: -4px 0 24px rgba(0,0,0,0.12);
+}
+.drawer.open { right: 0; }
+.drawer-header {
+  padding: 1.5rem;
+  background: var(--ink);
+  color: var(--white);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.drawer-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.drawer-model { font-size: 12px; color: rgba(255,255,255,0.5); letter-spacing: 0.06em; text-transform: uppercase; }
+.drawer-close {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  font-size: 22px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.drawer-body { padding: 1.5rem; }
+.drawer-section { margin-bottom: 1.5rem; }
+.drawer-section-title {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--bone-3);
+}
+.drawer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.drawer-field label { font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); display: block; margin-bottom: 3px; }
+.drawer-field span { font-size: 13px; color: var(--ink); font-weight: 500; }
+.drawer-field.full { grid-column: 1 / -1; }
+.drawer-notes {
+  background: var(--bone);
+  border-radius: 7px;
+  padding: 0.75rem;
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+
+/* ── Loading / Empty ── */
+.loading { text-align: center; padding: 4rem 2rem; color: var(--ink-3); font-size: 14px; }
+.empty { text-align: center; padding: 3rem 2rem; color: var(--ink-3); font-size: 13px; }
+
+/* ── Responsive ── */
+@media (max-width: 1100px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .kanban { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 700px) {
+  .main { padding: 1rem; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .kanban { grid-template-columns: 1fr 1fr; }
+  .drawer { width: 100%; right: -100%; }
+}
+
+/* ── View Sections ── */
+.view { display: none; }
+.view.active { display: block; }
+</style>
+</head>
+<body>
+
+<!-- Auth Gate -->
+<div id="auth-gate">
+  <div class="auth-box">
+    <div class="auth-logo">New Primitive<sup>°</sup></div>
+    <div class="auth-sub">Command Center</div>
+    <input type="password" id="pass-input" placeholder="Enter access code" />
+    <button class="auth-btn" onclick="checkAuth()">Enter</button>
+    <div class="auth-error" id="auth-error">Incorrect access code</div>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app">
+  <header class="header">
+    <div class="logo">New Primitive<sup>°</sup></div>
+    <div class="header-right">
+      <span class="header-label" id="last-updated"></span>
+      <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
+    </div>
+  </header>
+
+  <nav class="nav">
+    <div class="nav-tab active" data-view="overview" onclick="switchView('overview', this)">Overview</div>
+    <div class="nav-tab" data-view="builds" onclick="switchView('builds', this)">Build Queue</div>
+    <div class="nav-tab" data-view="estimates" onclick="switchView('estimates', this)">Estimates</div>
+    <div class="nav-tab" data-view="pipeline" onclick="switchView('pipeline', this)">Pipeline</div>
+  </nav>
+
+  <main class="main">
+
+    <!-- ── Overview ── -->
+    <div class="view active" id="view-overview">
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card"><div class="stat-label">Active Builds</div><div class="stat-value" id="stat-builds">—</div></div>
+        <div class="stat-card"><div class="stat-label">Pipeline Value</div><div class="stat-value gold" id="stat-pipeline">—</div></div>
+        <div class="stat-card"><div class="stat-label">Deposits Received</div><div class="stat-value" id="stat-deposits">—</div></div>
+        <div class="stat-card"><div class="stat-label">Installs This Month</div><div class="stat-value" id="stat-installs">—</div></div>
+      </div>
+
+      <div class="section-header">
+        <div class="section-title">Build Queue — Active</div>
+        <div class="section-count" id="bq-count">0 records</div>
+      </div>
+      <div class="table-wrap" id="overview-build-table">
+        <div class="loading">Loading...</div>
+      </div>
+    </div>
+
+    <!-- ── Build Queue ── -->
+    <div class="view" id="view-builds">
+      <div class="section-header">
+        <div class="section-title">Build Queue</div>
+        <div class="section-count" id="builds-count">0 records</div>
+      </div>
+      <div class="filter-bar" id="builds-filters"></div>
+      <div class="table-wrap" id="builds-table">
+        <div class="loading">Loading...</div>
+      </div>
+    </div>
+
+    <!-- ── Estimates ── -->
+    <div class="view" id="view-estimates">
+      <div class="section-header">
+        <div class="section-title">Estimates</div>
+        <div class="section-count" id="estimates-count">0 records</div>
+      </div>
+      <div class="filter-bar" id="estimates-filters"></div>
+      <div class="table-wrap" id="estimates-table">
+        <div class="loading">Loading...</div>
+      </div>
+    </div>
+
+    <!-- ── Pipeline ── -->
+    <div class="view" id="view-pipeline">
+      <div class="section-header">
+        <div class="section-title">Sales Pipeline</div>
+        <div class="section-count" id="pipeline-count">0 records</div>
+      </div>
+      <div class="kanban" id="pipeline-kanban">
+        <div class="loading">Loading...</div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Detail Drawer -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div>
+      <div class="drawer-name" id="drawer-name">—</div>
+      <div class="drawer-model" id="drawer-model">—</div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">×</button>
+  </div>
+  <div class="drawer-body" id="drawer-body"></div>
+</div>
+
+<script>
+// ── Auth ──
+const ACCESS_CODE = 'np2024';
+function checkAuth() {
+  const val = document.getElementById('pass-input').value;
+  if (val === ACCESS_CODE) {
+    document.getElementById('auth-gate').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadData();
+  } else {
+    document.getElementById('auth-error').style.display = 'block';
+  }
+}
+document.getElementById('pass-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') checkAuth();
+});
+
+// ── State ──
+let state = { buildQueue: [], estimates: [], pipeline: [], stats: {} };
+let buildFilter = 'All';
+let estimateFilter = 'All';
+
+// ── Data Load ──
+async function loadData() {
+  try {
+    const r = await fetch('/api/dashboard');
+    const data = await r.json();
+    if (!data.success) throw new Error(data.error);
+    state = data;
+    renderAll();
+    document.getElementById('last-updated').textContent =
+      'Updated ' + new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  } catch (err) {
+    console.error(err);
+    ['overview-build-table','builds-table','estimates-table'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = '<div class="loading">Failed to load. Check API key.</div>';
+    });
+  }
+}
+
+function renderAll() {
+  renderStats();
+  renderOverviewBuilds();
+  renderBuildsTable();
+  renderEstimatesTable();
+  renderPipeline();
+}
+
+// ── Stats ──
+function renderStats() {
+  const s = state.stats;
+  document.getElementById('stat-builds').textContent = s.activeBuilds ?? 0;
+  document.getElementById('stat-pipeline').textContent = fmt(s.totalPipelineValue);
+  document.getElementById('stat-deposits').textContent = s.depositsReceived ?? 0;
+  document.getElementById('stat-installs').textContent = s.installsThisMonth ?? 0;
+}
+
+// ── Format Helpers ──
+function fmt(v) {
+  if (!v) return '—';
+  return '$' + Number(v).toLocaleString('en-US', { maximumFractionDigits: 0 });
+}
+function fmtDate(d) {
+  if (!d) return '—';
+  return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+function statusBadge(s) {
+  if (!s) return '<span class="badge badge-gray">—</span>';
+  const map = {
+    'In Production': 'badge-green', 'In Build': 'badge-green', 'Active': 'badge-green',
+    'Draft': 'badge-gray', 'Pending': 'badge-gold', 'Quoted': 'badge-blue',
+    'Deposit Received': 'badge-green', 'Sent': 'badge-blue',
+    'Approved': 'badge-green', 'Lost': 'badge-red',
+    'Lead': 'badge-gold', 'Qualified': 'badge-blue',
+  };
+  const cls = map[s] || 'badge-gray';
+  return `<span class="badge ${cls}">${s}</span>`;
+}
+function confidenceCls(c) {
+  if (!c) return '';
+  if (c === 'High') return 'kc-conf-high';
+  if (c === 'Medium') return 'kc-conf-med';
+  return 'kc-conf-low';
+}
+
+// ── Overview Builds ──
+function renderOverviewBuilds() {
+  const active = state.buildQueue.filter(b =>
+    ['In Production', 'In Build', 'Active', 'Deposit Received'].includes(b['Project Status'])
+  );
+  document.getElementById('bq-count').textContent = active.length + ' records';
+  document.getElementById('overview-build-table').innerHTML = buildTableHTML(active);
+}
+
+// ── Build Queue ──
+function renderBuildsTable() {
+  const statuses = ['All', ...new Set(state.buildQueue.map(b => b['Project Status']).filter(Boolean))];
+  document.getElementById('builds-filters').innerHTML = statuses.map(s =>
+    `<div class="filter-chip ${s === buildFilter ? 'active' : ''}" onclick="setBuildFilter('${s}')">${s}</div>`
+  ).join('');
+
+  const filtered = buildFilter === 'All' ? state.buildQueue :
+    state.buildQueue.filter(b => b['Project Status'] === buildFilter);
+  document.getElementById('builds-count').textContent = filtered.length + ' records';
+  document.getElementById('builds-table').innerHTML = buildTableHTML(filtered);
+}
+function setBuildFilter(f) { buildFilter = f; renderBuildsTable(); }
+
+function buildTableHTML(rows) {
+  if (!rows.length) return '<div class="empty">No records found.</div>';
+  return `<table>
+    <thead><tr>
+      <th>Client</th><th>Model</th><th>Status</th><th>Stage</th>
+      <th>Deal Value</th><th>COGS</th><th>Margin</th>
+      <th>Install Date</th><th>Days Left</th>
+    </tr></thead>
+    <tbody>
+    ${rows.map(b => `
+      <tr onclick="openBuildDrawer('${b.id}')">
+        <td><div class="td-name">${b['Full Name'] || '—'}</div><div class="td-model">${b['Email'] || ''}</div></td>
+        <td>${b['Product Model'] || b['Product:'] || '—'}</td>
+        <td>${statusBadge(b['Project Status'])}</td>
+        <td>${b['Project Stage'] ? `<span style="font-size:12px;color:var(--ink-3)">${b['Project Stage']}</span>` : '—'}</td>
+        <td class="td-value">${fmt(b['Estimated Deal Value'])}</td>
+        <td>${fmt(b['Estimated COGS'])}</td>
+        <td>${b['Est. Margin %'] ? Math.round(b['Est. Margin %'] * 100) / 100 + '%' : '—'}</td>
+        <td class="td-date">${fmtDate(b['Installation Date'])}</td>
+        <td>${b['Days Left To Complete Project'] != null ? b['Days Left To Complete Project'] + 'd' : '—'}</td>
+      </tr>`).join('')}
+    </tbody></table>`;
+}
+
+// ── Estimates ──
+function renderEstimatesTable() {
+  const statuses = ['All', ...new Set(state.estimates.map(e => e['Estimate Status']).filter(Boolean))];
+  document.getElementById('estimates-filters').innerHTML = statuses.map(s =>
+    `<div class="filter-chip ${s === estimateFilter ? 'active' : ''}" onclick="setEstimateFilter('${s}')">${s}</div>`
+  ).join('');
+
+  const filtered = estimateFilter === 'All' ? state.estimates :
+    state.estimates.filter(e => e['Estimate Status'] === estimateFilter);
+  document.getElementById('estimates-count').textContent = filtered.length + ' records';
+
+  if (!filtered.length) {
+    document.getElementById('estimates-table').innerHTML = '<div class="empty">No estimates found.</div>';
+    return;
+  }
+  document.getElementById('estimates-table').innerHTML = `<table>
+    <thead><tr>
+      <th>Client</th><th>Model</th><th>Heater</th><th>Exterior</th>
+      <th>Total</th><th>Deposit</th><th>Status</th><th>Estimate Date</th><th>Follow-Up</th>
+    </tr></thead>
+    <tbody>
+    ${filtered.map(e => `
+      <tr onclick="openEstimateDrawer('${e.id}')">
+        <td><div class="td-name">${e['Client First Name'] || ''} ${e['Client Last Name'] || ''}</div>
+            <div class="td-model">${e['Client Email'] || ''}</div></td>
+        <td>${e['Base Model'] || '—'}</td>
+        <td>${e['Heater'] || '—'}</td>
+        <td>${e['Exterior Cladding'] || '—'}</td>
+        <td class="td-value">${fmt(e['Total Estimate'])}</td>
+        <td>${fmt(e['Deposit Required'])}</td>
+        <td>${statusBadge(e['Estimate Status'])}</td>
+        <td class="td-date">${fmtDate(e['Estimate Date'])}</td>
+        <td class="td-date">${fmtDate(e['Follow-Up Date'])}</td>
+      </tr>`).join('')}
+    </tbody></table>`;
+}
+function setEstimateFilter(f) { estimateFilter = f; renderEstimatesTable(); }
+
+// ── Pipeline Kanban ──
+const PIPELINE_STAGES = ['Lead', 'Qualified', 'Proposal Sent', 'Negotiation', 'Closed Won'];
+function renderPipeline() {
+  document.getElementById('pipeline-count').textContent = state.pipeline.length + ' deals';
+  const grouped = {};
+  PIPELINE_STAGES.forEach(s => grouped[s] = []);
+  state.pipeline.forEach(d => {
+    const s = d['Stage'];
+    if (grouped[s]) grouped[s].push(d);
+    else {
+      grouped[s] = grouped[s] || [];
+      grouped[s].push(d);
+    }
+  });
+
+  const stages = [...new Set([...PIPELINE_STAGES, ...state.pipeline.map(d => d['Stage']).filter(Boolean)])];
+
+  document.getElementById('pipeline-kanban').innerHTML = stages.map(stage => {
+    const deals = grouped[stage] || [];
+    return `<div class="kanban-col">
+      <div class="kanban-header">
+        <span class="kanban-stage">${stage || 'Unknown'}</span>
+        <span class="kanban-n">${deals.length}</span>
+      </div>
+      <div class="kanban-body">
+        ${deals.length ? deals.map(d => `
+          <div class="kanban-card" onclick="openPipelineDrawer('${d.id}')">
+            <div class="kc-name">${d['Client Name'] || '—'}</div>
+            <div class="kc-project">${d['Project Name'] || ''}</div>
+            <div class="kc-meta">
+              <span class="kc-value">${fmt(d['Deal Size'])}</span>
+              ${d['Confidence'] ? `<span class="kc-conf ${confidenceCls(d['Confidence'])}">${d['Confidence']}</span>` : ''}
+            </div>
+            ${d['Next Action'] ? `<div class="kc-action">${d['Next Action'].substring(0, 60)}${d['Next Action'].length > 60 ? '…' : ''}</div>` : ''}
+          </div>`).join('') : '<div style="padding:0.75rem;font-size:12px;color:var(--ink-3);text-align:center">Empty</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── Drawers ──
+function openDrawer(name, model, bodyHTML) {
+  document.getElementById('drawer-name').textContent = name;
+  document.getElementById('drawer-model').textContent = model;
+  document.getElementById('drawer-body').innerHTML = bodyHTML;
+  document.getElementById('drawer-overlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+}
+function closeDrawer() {
+  document.getElementById('drawer-overlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+}
+
+function openBuildDrawer(id) {
+  const b = state.buildQueue.find(r => r.id === id);
+  if (!b) return;
+  openDrawer(
+    b['Full Name'] || '—',
+    b['Product Model'] || b['Product:'] || 'Build Record',
+    `<div class="drawer-section">
+      <div class="drawer-section-title">Status</div>
+      <div class="drawer-grid">
+        <div class="drawer-field"><label>Project Status</label><span>${statusBadge(b['Project Status'])}</span></div>
+        <div class="drawer-field"><label>Project Stage</label><span>${b['Project Stage'] || '—'}</span></div>
+        <div class="drawer-field"><label>Account Manager</label><span>${b['Account Manager'] || '—'}</span></div>
+        <div class="drawer-field"><label>Sales Owner</label><span>${b['Sales Owner'] || '—'}</span></div>
+      </div>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-title">Financials</div>
+      <div class="drawer-grid">
+        <div class="drawer-field"><label>Deal Value</label><span>${fmt(b['Estimated Deal Value'])}</span></div>
+        <div class="drawer-field"><label>Est. COGS</label><span>${fmt(b['Estimated COGS'])}</span></div>
+        <div class="drawer-field"><label>Actual COGS</label><span>${fmt(b['Actual COGS'])}</span></div>
+        <div class="drawer-field"><label>Margin</label><span>${b['Est. Margin %'] ? b['Est. Margin %'] + '%' : '—'}</span></div>
+        <div class="drawer-field"><label>Primary Deposit</label><span>${fmt(b['Primary Deposit Amount'])} ${b['Primary Deposit Received'] ? '✓' : '—'}</span></div>
+        <div class="drawer-field"><label>Micro Deposit</label><span>${fmt(b['Micro Deposit Amount'])} ${b['Micro Deposit Received'] ? '✓' : '—'}</span></div>
+      </div>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-title">Timeline</div>
+      <div class="drawer-grid">
+        <div class="drawer-field"><label>Build Start</label><span>${fmtDate(b['Build Production Start Date'])}</span></div>
+        <div class="drawer-field"><label>Deadline</label><span>${fmtDate(b['Deadline Date'])}</span></div>
+        <div class="drawer-field"><label>Installation Date</label><span>${fmtDate(b['Installation Date'])}</span></div>
+        <div class="drawer-field"><label>Days Left</label><span>${b['Days Left To Complete Project'] != null ? b['Days Left To Complete Project'] + ' days' : '—'}</span></div>
+        <div class="drawer-field"><label>Next Follow-Up</label><span>${fmtDate(b['Next Follow-Up Date'])}</span></div>
+      </div>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-title">Build Specs</div>
+      <div class="drawer-grid">
+        <div class="drawer-field"><label>Exterior</label><span>${b['Exterior'] || '—'}</span></div>
+        <div class="drawer-field"><label>Interior</label><span>${b['Interior'] || '—'}</span></div>
+        <div class="drawer-field"><label>Heater</label><span>${b['Heater'] || '—'}</span></div>
+        <div class="drawer-field"><label>Lead Source</label><span>${b['Lead Source'] || '—'}</span></div>
+      </div>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-title">Contact</div>
+      <div class="drawer-grid">
+        <div class="drawer-field"><label>Email</label><span>${b['Email'] ? `<a href="mailto:${b['Email']}" style="color:var(--gold-2)">${b['Email']}</a>` : '—'}</span></div>
+        <div class="drawer-field"><label>Phone</label><span>${b['Phone Number'] || b['Phone'] || '—'}</span></div>
+        <div class="drawer-field full"><label>Address</label><span>${b['Address'] || '—'}</span></div>
+      </div>
+    </div>`
+  );
+}
+
+function openEstimateDrawer(id) {
+  const e = state.estimates.find(r => r.id === id);
+  if (!e) return;
+  openDrawer(
+    `${e['Client First Name'] || ''} ${e['Client Last Name'] || ''}`.trim() || '—',
+    e['Base Model'] || 'Estimate',
+    `<div class="drawer-section">
+      <div class="drawer-section-title">Status</div>
+      <div class="drawer-grid">
+        <div class="drawer-field"><label>Estimate Status</label><span>${statusBadge(e['Estimate Status'])}</span></div>
+        <div class="drawer-field"><label>Estimate Date</label><span>${fmtDate(e['Estimate Date'])}</span></div>
+        <div class="drawer-field"><label>Follow-Up Date</label><span>${fmtDate(e['Follow-Up Date'])}</span></div>
+      </div>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-title">Pricing</div>
+      <div class="drawer-grid">
+        <div class="drawer-field"><label>Total Estimate</label><span>${fmt(e['Total Estimate'])}</span></div>
+        <div class="drawer-field"><label>Deposit Required</label><span>${fmt(e['Deposit Required'])}</span></div>
+      </div>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-title">Specs</div>
+      <div class="drawer-grid">
+        <div class="drawer-field"><label>Base Model</label><span>${e['Base Model'] || '—'}</span></div>
+        <div class="drawer-field"><label>Heater</label><span>${e['Heater'] || '—'}</span></div>
+        <div class="drawer-field"><label>Exterior Cladding</label><span>${e['Exterior Cladding'] || '—'}</span></div>
+        <div class="drawer-field"><label>Interior Wall</label><span>${e['Interior Wall Material'] || '—'}</span></div>
+        <div class="drawer-field full"><label>Add-Ons</label><span>${Array.isArray(e['Add-Ons']) ? e['Add-Ons'].join(', ') : (e['Add-Ons'] || '—')}</span></div>
+      </div>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-title">Contact</div>
+      <div class="drawer-grid">
+        <div class="drawer-field"><label>Email</label><span>${e['Client Email'] ? `<a href="mailto:${e['Client Email']}" style="color:var(--gold-2)">${e['Client Email']}</a>` : '—'}</span></div>
+        <div class="drawer-field"><label>Phone</label><span>${e['Client Phone'] || '—'}</span></div>
+      </div>
+    </div>
+    ${e['Internal Notes'] ? `<div class="drawer-section">
+      <div class="drawer-section-title">Internal Notes</div>
+      <div class="drawer-notes">${e['Internal Notes']}</div>
+    </div>` : ''}`
+  );
+}
+
+function openPipelineDrawer(id) {
+  const d = state.pipeline.find(r => r.id === id);
+  if (!d) return;
+  openDrawer(
+    d['Client Name'] || '—',
+    d['Project Name'] || 'Pipeline Deal',
+    `<div class="drawer-section">
+      <div class="drawer-section-title">Deal Info</div>
+      <div class="drawer-grid">
+        <div class="drawer-field"><label>Stage</label><span>${d['Stage'] || '—'}</span></div>
+        <div class="drawer-field"><label>Confidence</label><span>${d['Confidence'] || '—'}</span></div>
+        <div class="drawer-field"><label>Deal Size</label><span>${fmt(d['Deal Size'])}</span></div>
+        <div class="drawer-field"><label>Days in Stage</label><span>${d['Days in Stage'] != null ? d['Days in Stage'] + ' days' : '—'}</span></div>
+        <div class="drawer-field"><label>Budget Aligned</label><span>${d['Budget Aligned'] ? 'Yes' : 'No'}</span></div>
+        <div class="drawer-field"><label>Timeline Fit</label><span>${d['Timeline Fit'] ? 'Yes' : 'No'}</span></div>
+        <div class="drawer-field"><label>Path</label><span>${d['Path'] || '—'}</span></div>
+        <div class="drawer-field"><label>Owner</label><span>${d['Owner'] || '—'}</span></div>
+      </div>
+    </div>
+    ${d['Next Action'] ? `<div class="drawer-section">
+      <div class="drawer-section-title">Next Action</div>
+      <div class="drawer-notes">${d['Next Action']}</div>
+    </div>` : ''}
+    ${d['Blocker'] ? `<div class="drawer-section">
+      <div class="drawer-section-title">Blocker: ${d['Blocker']}</div>
+      <div class="drawer-notes">${d['Blocker Description'] || '—'}</div>
+    </div>` : ''}`
+  );
+}
+
+// ── View Switching ──
+function switchView(name, el) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>
